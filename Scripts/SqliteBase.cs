@@ -58,10 +58,11 @@ namespace Lib{
         public string Email { get; set; }
         public string Phone { get; set; }
 
+        public string Type { get; set; }
 
         public override string ToString()
         {
-            return string.Format("[Store:Id={0},Store_Name={1},Email={2},Phone={3}]", Id, Store_Name, Email, Phone);
+            return string.Format("[Store:Id={0},Store_Name={1},Email={2},Phone={3},Type={4}]", Id, Store_Name, Email, Phone, Type);
         }
 
     }
@@ -78,13 +79,28 @@ namespace Lib{
         }
 
     }
+    public class Only
+    {
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
+        public string Store_Name { get; set; }
+        public string Coup_Name { get; set; }
+        public string Code { get; set; }
+        public string Describe { get; set; }
+        
+        public string Type { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("[Store:Id={0},Store_Name={1},Coupon_Name={2},Code={3},Describe,Type={4}]", Id, Store_Name, Coup_Name, Code, Describe, Type);
+        }
+    }
 
 
-
-    public class SqliteBase : MonoBehaviour
+        public class SqliteBase : MonoBehaviour
     {
         public static SQLiteConnection Connection = new SQLiteConnection(Application.streamingAssetsPath + "/TestDatabase.db", SQLiteOpenFlags.ReadWrite);
-        public void InsertData(Users newRow)
+        public void Sign_Up(Users newRow)
         {
             //var u = new Users
             //{
@@ -118,7 +134,8 @@ namespace Lib{
             //{
             //    Store_Name = "³Á·í³Ò",
             //    Email = "MC@gmail.com",
-            //    Phone = "0965782459"
+            //    Phone = "0965782459",
+            //    Type = "­¹«~"
             //};
 
             try
@@ -184,18 +201,50 @@ namespace Lib{
                 Debug.Log(e);
             }
         }
-        public void  SelectBag(int User_Id)
+        public void Select(int User_Id)
         {
 
             var bag = Connection.Table<Bags>().Where(_ => _.User_Id == User_Id);
             int i = 1;
+            foreach (var coupon in bag)
+            {
+                var c = Connection.Table<Coupons>().Where(_ => _.Id == coupon.Coupon_Id).First();
+                var s = Connection.Table<Stores>().Where(_ => _.Id == c.Store_Id).First();
+                Debug.Log(i + ". " + s.Store_Name +"("+ s.Type+")\n" + c.Coup_Name + ": " + c.Describe + "\n" + "Àu´f½X: " + c.Code + "\n");
+                i++;
+            }
+        }
+        public SQLite4Unity3d.TableQuery<Lib.Bags> SelectBagAll(int User_Id)
+        {
+            var bag = Connection.Table<Bags>().Where(_ => _.User_Id == User_Id);
             foreach (var coupon in bag) 
             {
                 var c = Connection.Table<Coupons>().Where(_ => _.Id == coupon.Coupon_Id).First();
                 var s = Connection.Table<Stores>().Where(_ => _.Id ==c.Store_Id).First();
-                Debug.Log(i+". "+s.Store_Name + "\n" + c.Coup_Name + ": "   + c.Describe+ "\n" +"Àu´f½X: "+ c.Code+"\n");
-                i++;            
+                     
             }
+            return bag;
+        }
+        public SQLite4Unity3d.TableQuery<Lib.Bags> SelectBagLike(int User_Id)
+        {
+            var bag = Connection.Table<Bags>().Where(_ => _.User_Id == User_Id && _.Like == 1);
+            return bag;
+        }
+        public Only SelectBagOne(int Bag_Id)
+        {
+            var bag = Connection.Table<Bags>().Where(_ => _.Id == Bag_Id).First();
+            var c = Connection.Table<Coupons>().Where(_ => _.Id == bag.Coupon_Id).First();
+            var s = Connection.Table<Stores>().Where(_ => _.Id == c.Store_Id).First();
+            var res = new Only
+            {
+                Id = c.Id,
+                Store_Name = s.Store_Name,
+                Coup_Name = c.Coup_Name,
+                Code = c.Code,
+                Describe = c.Describe,
+                Type = s.Type
+            };
+            return res;
         }
 
         public void Leaderboard(int User_Id)
@@ -283,6 +332,58 @@ namespace Lib{
 
                 Debug.Log("½Ð¿é¤J0~3");
             }
+        }
+
+        public Users user_Information(int user_Id)
+        {
+            var user = Connection.Table<Users>().Where(_ => _.Id == user_Id).First();
+
+            return user;
+        }
+        public int log_In(string Email, string PassWord )
+        {
+            var email = Connection.Table<Users>().Where(_ => _.Email == Email).First();
+            int user_id = 777;
+            if (email.Password == PassWord)
+            {
+                user_id = Connection.Table<Users>().Where(_ => _.Email == Email).First().Id;
+            }
+
+            return user_id;
+        }
+        public void Insert_Coupon(int user_Id)
+        {
+            System.Random rd = new System.Random();
+            var num = Connection.Table<Coupons>().Count();
+            int ranNum = rd.Next(0, num);
+            var b = new Bags
+            {
+                User_Id = user_Id,
+                Coupon_Id = ranNum,
+                Like = 0
+            };
+
+            try
+            {
+                Connection.Insert(b);
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+        }
+        public void User_Change(Users oldRow)
+        {
+
+            try
+            {
+                Connection.Update(oldRow);
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
+
         }
     }
 }
