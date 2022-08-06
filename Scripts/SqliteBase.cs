@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using SQLite4Unity3d;
@@ -41,10 +41,11 @@ namespace Lib{
 
         public string Describe { get; set; }
 
+        public int Type { get; set; }
 
         public override string ToString()
         {
-            return string.Format("[Coupon:Id={0},Coup_Name={1},Store_Id={2},Code={3},Describe={4}]", Id, Coup_Name, Store_Id, Code,Describe);
+            return string.Format("[Coupon:Id={0},Coup_Name={1},Store_Id={2},Code={3},Describe={4}, Type={5}]", Id, Coup_Name, Store_Id, Code,Describe, Type);
         }
 
     }
@@ -104,9 +105,9 @@ namespace Lib{
         {
             //var u = new Users
             //{
-            //    Name = "¨fΩÂ",
-            //    City = "∑s•_•´",
-            //    District = "™OæÙ∞œ",
+            //    Name = "ÊüèË≥¢",
+            //    City = "Êñ∞ÂåóÂ∏Ç",
+            //    District = "ÊùøÊ©ãÂçÄ",
             //    Score1 = 100,
             //    Score2 = 30,
             //    Img_Id = 0,
@@ -130,12 +131,12 @@ namespace Lib{
         }
         public void InsertData(Stores newRow)
         {
-            //var s = new Stores
+            //new Stores
             //{
-            //    Store_Name = "≥¡∑Ì≥“",
+            //    Store_Name = "È∫•Áï∂Âãû",
             //    Email = "MC@gmail.com",
             //    Phone = "0965782459",
-            //    Type = "≠π´~"
+            //    Type = "È£üÂìÅ"
             //};
 
             try
@@ -152,10 +153,10 @@ namespace Lib{
         {
             //var c = new Coupons
             //{
-            //    Coup_Name = "¶B¨Ø≠∑",
+            //    Coup_Name = "ÂÜ∞ÁÇ´È¢®",
             //    Store_Id = 1,
             //    Code = "NCTC654",
-            //    Describe = "•[§@§∏¶h§@•Û"
+            //    Describe = "Âä†‰∏ÄÂÖÉÂ§ö‰∏Ä‰ª∂"
             //};
 
             try
@@ -189,7 +190,7 @@ namespace Lib{
         }
         public void UpDateData()
         {
-            var data = Connection.Table<Users>().Where(_ => _.Name == "≥’≥‘").FirstOrDefault();
+            var data = Connection.Table<Users>().Where(_ => _.Name == "ÂçöÂãõ").FirstOrDefault();
             data.Gender = "F";
             
             try
@@ -210,24 +211,29 @@ namespace Lib{
             {
                 var c = Connection.Table<Coupons>().Where(_ => _.Id == coupon.Coupon_Id).First();
                 var s = Connection.Table<Stores>().Where(_ => _.Id == c.Store_Id).First();
-                Debug.Log(i + ". " + s.Store_Name +"("+ s.Type+")\n" + c.Coup_Name + ": " + c.Describe + "\n" + "¿u¥fΩX: " + c.Code + "\n");
+                Debug.Log(i + ". " + s.Store_Name +"("+ s.Type+")\n" + c.Coup_Name + ": " + c.Describe + "\n" + "ÂÑ™ÊÉ†Á¢º: " + c.Code + "\n");
                 i++;
+            }
+        }
+
+        //‰ΩîÂ≠ò
+        public void SelectCoupon(SQLite4Unity3d.TableQuery<Lib.Bags> bag)
+        {
+            foreach (var coupon in bag)
+            {
+                var c = Connection.Table<Coupons>().Where(_ => _.Id == coupon.Coupon_Id).First();
+                var s = Connection.Table<Stores>().Where(_ => _.Id == c.Store_Id).First();
             }
         }
         public SQLite4Unity3d.TableQuery<Lib.Bags> SelectBagAll(int User_Id)
         {
             var bag = Connection.Table<Bags>().Where(_ => _.User_Id == User_Id);
-            foreach (var coupon in bag) 
-            {
-                var c = Connection.Table<Coupons>().Where(_ => _.Id == coupon.Coupon_Id).First();
-                var s = Connection.Table<Stores>().Where(_ => _.Id ==c.Store_Id).First();
-                     
-            }
             return bag;
         }
         public SQLite4Unity3d.TableQuery<Lib.Bags> SelectBagLike(int User_Id)
         {
             var bag = Connection.Table<Bags>().Where(_ => _.User_Id == User_Id && _.Like == 1);
+ 
             return bag;
         }
         public Only SelectBagOne(int Bag_Id)
@@ -330,7 +336,7 @@ namespace Lib{
 
             } else {
 
-                Debug.Log("Ω–øÈ§J0~3");
+                Debug.Log("Ë´ãËº∏ÂÖ•0~3");
             }
         }
 
@@ -351,7 +357,7 @@ namespace Lib{
 
             return user_id;
         }
-        public void Insert_Coupon(int user_Id)
+        public int Insert_Coupon(int user_Id)
         {
             System.Random rd = new System.Random();
             var num = Connection.Table<Coupons>().Count();
@@ -366,10 +372,13 @@ namespace Lib{
             try
             {
                 Connection.Insert(b);
+                return Connection.Table<Coupons>().Where(_ => _.Id == ranNum).First().Type;
+
             }
             catch (Exception e)
             {
                 Debug.Log(e);
+                return -999;
             }
         }
         public void User_Change(Users oldRow)
@@ -385,5 +394,18 @@ namespace Lib{
             }
 
         }
+
+        public void Leaderboard()
+        {
+
+            var query = ("SELECT City,District,Name,Score1 FROM Users ORDER BY Score1 DESC");
+            var data = new object[] { "City", "District", "Name", "Score1" };
+            var cmd = Connection.Query(new TableMapping(typeof(Users)), query, data);
+            for (int i = 0; i < 5; i++)
+            {
+                Debug.Log(cmd[i]);
+            }
+        }
+
     }
 }

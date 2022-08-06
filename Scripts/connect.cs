@@ -17,17 +17,28 @@ public class connect : MonoBehaviour
         
         sb = new SqliteBase();
 
-        var s = new Stores
-        {
-            Store_Name = "麥當勞",
-            Email = "MC@gmail.com",
-            Phone = "0965782459",
-            Type = "食品"
-        };
+        //sb.Create_Table(0);
+        //for (int i = 1; i <= 6; i++)
+        //{
+        //    var u = new Users
+        //    {
+        //        Name = "柏賢" + i,
+        //        City = "新北市" + i,
+        //        District = "板橋區" + i,
+        //        Score1 = 100+i*10,
+        //        Score2 = 30+i*10,
+        //        Img_Id = 0,
+        //        Email = "gg@gmail.com+i",
+        //        Password = "123456",
+        //        Gender = "M",
+        //        Birthday = DateTime.Parse("2001/12/16"),
+        //        Phone = "0965465165",
 
+        //    };
+        //    sb.Sign_Up(u);
+        //}
 
-        sb.Create_Table(2);
-        sb.InsertData(s);
+        sb.Leaderboard();
         sb.Close();
     }
 
